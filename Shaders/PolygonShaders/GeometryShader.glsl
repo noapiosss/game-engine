@@ -46,7 +46,7 @@ struct plane
 };
 
 float getBrightness(vec3 point, vec3 pointNormal)
-{s
+{
     vec3 normalizedNormal = normalize(pointNormal);                
     vec3 normalizedLightDir = normalize(lightPosition - point);
 
