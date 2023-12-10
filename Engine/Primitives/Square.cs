@@ -12,8 +12,9 @@ namespace RenderingGL.Engine.Primitives
         {
             Pivot = pivot;
             Color = color;
-            Speed = Vector3.Zero;
+            Velocity = Vector3.Zero;
             length = 20;
+            IsStatic = true;
         }
 
         public override void OnCollision()
@@ -21,9 +22,9 @@ namespace RenderingGL.Engine.Primitives
             
         }
 
-        public override bool IsCollision(Primitive primitive)
+        public override void SolveCollision(Primitive primitive)
         {
-            return false;
+            
         }
 
         public override Polygon3[] GetPolygons()

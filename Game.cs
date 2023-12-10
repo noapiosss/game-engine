@@ -192,12 +192,7 @@ namespace RenderingGL
         {
             foreach (Primitive primitive1 in primitives)
             {
-                if (primitive1 is not Cube)
-                {
-                    continue;
-                }
-
-                primitive1.Speed -= Vector3.UnitY * 0.0000032f;
+                primitive1.Velocity -= Vector3.UnitY * 0.0000032f;
                 primitive1.Move();
 
                 foreach (Primitive primitive2 in primitives)
@@ -207,11 +202,7 @@ namespace RenderingGL
                         continue;
                     }
 
-                    if (primitive1.IsCollision(primitive2))
-                    {
-                        //primitive1.OnCollision();
-                        //primitive2.OnCollision();
-                    }
+                    primitive1.SolveCollision(primitive2);
                 }
             }
 

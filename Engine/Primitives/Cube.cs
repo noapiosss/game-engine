@@ -12,101 +12,136 @@ namespace Rendering.Engine.Primitives
 {
     public class Cube : Primitive
     {
-        private float sideLength;
-        public Cube(Vector3 center, float sideLength, Color4 color)
+        public float SideLength;
+
+        public Cube(Vector3 center, float sideLength, Color4 color, Vector3 velocity)
         {
             Pivot = new(center, new());
-            this.sideLength = sideLength;
+            SideLength = sideLength;
             Color = color;
-            Speed = Vector3.Zero;
+            Velocity = velocity;
+            
+            IsStatic = false;
+
+            
+            LocalVertices = new Vector3[]
+            {
+                new(- sideLength/2, + sideLength/2, - sideLength/2), //0
+                new(- sideLength/2, + sideLength/2, + sideLength/2), //1
+                new(+ sideLength/2, + sideLength/2, + sideLength/2), //2
+                new(+ sideLength/2, + sideLength/2, - sideLength/2), //3
+                
+                new(- sideLength/2, - sideLength/2, - sideLength/2), //4
+                new(- sideLength/2, - sideLength/2, + sideLength/2), //5
+                new(+ sideLength/2, - sideLength/2, + sideLength/2), //6
+                new(+ sideLength/2, - sideLength/2, - sideLength/2)  //7
+            };
+
+            GlobalVertices = new Vector3[LocalVertices.Length];
+            Polygons = new Polygon3[12];
         }
 
-        public Cube(Vector3 center, float sideLength, Color4 color, Vector3 speed)
+        public Cube(Vector3 center, float sideLength, Color4 color, Vector3 velocity, float density)
         {
             Pivot = new(center, new());
-            this.sideLength = sideLength;
+            SideLength = sideLength;
             Color = color;
-            Speed = speed;
+            Velocity = velocity;
+            Density = density;
+            Volume = sideLength * sideLength * sideLength;
+            Mass = Density * Volume;
+            
+            IsStatic = false;
+
+            
+            LocalVertices = new Vector3[]
+            {
+                new(- sideLength/2, + sideLength/2, - sideLength/2), //0
+                new(- sideLength/2, + sideLength/2, + sideLength/2), //1
+                new(+ sideLength/2, + sideLength/2, + sideLength/2), //2
+                new(+ sideLength/2, + sideLength/2, - sideLength/2), //3
+                
+                new(- sideLength/2, - sideLength/2, - sideLength/2), //4
+                new(- sideLength/2, - sideLength/2, + sideLength/2), //5
+                new(+ sideLength/2, - sideLength/2, + sideLength/2), //6
+                new(+ sideLength/2, - sideLength/2, - sideLength/2)  //7
+            };
+
+            GlobalVertices = new Vector3[LocalVertices.Length];
+            Polygons = new Polygon3[12];
         }
 
         public override void OnCollision()
         {
-            Speed = -Speed * 4 / 5;
+            Velocity = -Velocity * 4 / 5;
         }
 
-        public override bool IsCollision(Primitive primitive)
+        public override void SolveCollision(Primitive primitive)
         {
-            if (primitive is not Square)
+            if (primitive.IsStatic)
             {
-                return false;
-            }
 
-            float distance = MathF.Abs(primitive.Pivot.Position.Y - this.Pivot.Position.Y);
-            bool isOver = 
-                primitive.Pivot.Position.X - 10 < Pivot.Position.X + sideLength/2 && Pivot.Position.X < primitive.Pivot.Position.X + 10 - sideLength/2 &&
-                primitive.Pivot.Position.Z - 10 < Pivot.Position.Z + sideLength/2 && Pivot.Position.Z < primitive.Pivot.Position.X + 10 - sideLength/2;
-            
-            if (!isOver)
-            {
-                return false;
-            }
-
-            if (distance > sideLength/2)
-            {
-                return false;
-            }
-            else if (distance == sideLength/2)
-            {
-                Speed = -Speed * 4 / 5;
-            }
-            else
-            {
-                Pivot.Move(Vector3.UnitY*(sideLength/2 - distance));
-                float t = (sideLength/2 - distance) / (2 * Speed.Length);
-                Speed = new Vector3(Speed.X, -Speed.Y * 4 / 5, Speed.Z);
-                Pivot.Move(t * Speed);
-            }
+                float distanceS = MathF.Abs(primitive.Pivot.Position.Y - this.Pivot.Position.Y);
+                bool isOver = 
+                    primitive.Pivot.Position.X - 10 - SideLength/2 < Pivot.Position.X && Pivot.Position.X < primitive.Pivot.Position.X + 10 + SideLength/2 &&
+                    primitive.Pivot.Position.Z - 10 - SideLength/2 < Pivot.Position.Z && Pivot.Position.Z < primitive.Pivot.Position.X + 10 + SideLength/2;
                 
-            return true;
+                if (!isOver)
+                {
+                    return;
+                }
+
+                if (distanceS > SideLength/2)
+                {
+                    return;
+                }
+                else if (distanceS == SideLength/2)
+                {
+                    Velocity = -Velocity * 4 / 5;
+                }
+                else
+                {
+                    Pivot.Move(Vector3.UnitY*(SideLength/2 - distanceS));
+                    float t = (SideLength/2 - distanceS) / (2 * Velocity.Length);
+                    Velocity = new Vector3(Velocity.X, -Velocity.Y * 4 / 5, Velocity.Z);
+                    Pivot.Move(t * Velocity);
+                }
+                    
+                return;
+            }
+
+            if (CubeCubeIntersection.BoundingBoxIntersect(this, (Cube)primitive))
+            {
+                if (CubeCubeIntersection.PreciseCollisionDetection(this, (Cube)primitive))
+                {
+                    var collisionNormal = CubeCubeIntersection.CalculateCollisionNormal(this, (Cube)primitive);
+                    CubeCubeIntersection.ResolvePenetration(this, (Cube)primitive, collisionNormal);
+                    CubeCubeIntersection.AdjustSpeedsWithMass(this, (Cube)primitive, collisionNormal); // Optional
+                }
+            }
         }
 
         public override Polygon3[] GetPolygons()
         {
-            Vector3[] v = new Vector3[]
+            for (int i = 0; i < GlobalVertices.Length; ++i)
             {
-                ToGlobal(new(- sideLength/2, + sideLength/2, - sideLength/2)), //0
-                ToGlobal(new(- sideLength/2, + sideLength/2, + sideLength/2)), //1
-                ToGlobal(new(+ sideLength/2, + sideLength/2, + sideLength/2)), //2
-                ToGlobal(new(+ sideLength/2, + sideLength/2, - sideLength/2)), //3
-                 
-                ToGlobal(new(- sideLength/2, - sideLength/2, - sideLength/2)), //4
-                ToGlobal(new(- sideLength/2, - sideLength/2, + sideLength/2)), //5
-                ToGlobal(new(+ sideLength/2, - sideLength/2, + sideLength/2)), //6
-                ToGlobal(new(+ sideLength/2, - sideLength/2, - sideLength/2))  //7
-            };
+                GlobalVertices[i] = ToGlobal(LocalVertices[i]);
+            }
 
-            
-
-            return new Polygon3[]
-            {
-                new(v[0], v[1], v[2], Color),
-                new(v[0], v[2], v[3], Color),
-                
-                new(v[5], v[1], v[0], Color),
-                new(v[5], v[0], v[4], Color),
-
-                new(v[6], v[2], v[1], Color),
-                new(v[6], v[1], v[5], Color),
-
-                new(v[7], v[3], v[2], Color),
-                new(v[7], v[2], v[6], Color),
-
-                new(v[4], v[0], v[3], Color),
-                new(v[4], v[3], v[7], Color),  
-                
-                new(v[4], v[7], v[6], Color),
-                new(v[4], v[6], v[5], Color)
-            };
+            Polygons[0] = new(GlobalVertices[0], GlobalVertices[1], GlobalVertices[2], Color);
+            Polygons[1] = new(GlobalVertices[0], GlobalVertices[2], GlobalVertices[3], Color);
+            Polygons[2] = new(GlobalVertices[5], GlobalVertices[1], GlobalVertices[0], Color);
+            Polygons[3] = new(GlobalVertices[5], GlobalVertices[0], GlobalVertices[4], Color);
+            Polygons[4] = new(GlobalVertices[6], GlobalVertices[2], GlobalVertices[1], Color);
+            Polygons[5] = new(GlobalVertices[6], GlobalVertices[1], GlobalVertices[5], Color);
+            Polygons[6] = new(GlobalVertices[7], GlobalVertices[3], GlobalVertices[2], Color);
+            Polygons[7] = new(GlobalVertices[7], GlobalVertices[2], GlobalVertices[6], Color);
+            Polygons[8] = new(GlobalVertices[4], GlobalVertices[0], GlobalVertices[3], Color);
+            Polygons[9] = new(GlobalVertices[4], GlobalVertices[3], GlobalVertices[7], Color);
+            Polygons[10] = new(GlobalVertices[4], GlobalVertices[7], GlobalVertices[6], Color);
+            Polygons[11] = new(GlobalVertices[4], GlobalVertices[6], GlobalVertices[5], Color);
+        
+            return Polygons;
         }
     }
 }
