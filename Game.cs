@@ -136,36 +136,35 @@ namespace RenderingGL
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            Vector3 light = new(0, -1, 0);
+            Polygon3[] spherePolygons = primitives[1].GetPolygons();
+
+            for (int i = 0; i < spherePolygons.Length; ++i)
+            {
+                GL.Begin(PrimitiveType.Triangles);
+                GL.Color4(spherePolygons[i].Color);
+                GL.Vertex3(spherePolygons[i].Vertices[0]);
+                GL.Vertex3(spherePolygons[i].Vertices[1]);
+                GL.Vertex3(spherePolygons[i].Vertices[2]);
+                GL.End();
+            }           
+
+            
+            Vector3 d = new Vector3(5 * MathF.Sin(theta), 0, 5 * MathF.Cos(theta));
+            Vector3 lightDirection = Vector3.Normalize(primitives[0].Pivot.Position - primitives[1].Pivot.Position + d);
 
             Polygon3[] cubePolygons = primitives[0].GetPolygons();
 
             for (int i = 0; i < cubePolygons.Length; ++i)
             {
-                float b =  MathF.Acos(Vector3.Dot(cubePolygons[i].Normal, light) / (cubePolygons[i].Normal.Length * light.Length)) / 3.14f;
-
+                float a = MathF.Acos(Vector3.Dot(cubePolygons[i].Normal, lightDirection) / (cubePolygons[i].Normal.Length * lightDirection.Length)) / 3.14f;
+                
                 GL.Begin(PrimitiveType.Triangles);
-                GL.Color4(new Color4(cubePolygons[i].Color.R * b, cubePolygons[i].Color.G * b, cubePolygons[i].Color.B * b, 1));
-                GL.Vertex3(cubePolygons[i].Vertices[0] + new Vector3(5 * MathF.Sin(theta), 0, 5 * MathF.Cos(theta)));
-                GL.Vertex3(cubePolygons[i].Vertices[1] + new Vector3(5 * MathF.Sin(theta), 0, 5 * MathF.Cos(theta)));
-                GL.Vertex3(cubePolygons[i].Vertices[2] + new Vector3(5 * MathF.Sin(theta), 0, 5 * MathF.Cos(theta)));
+                GL.Color4(new Color4(cubePolygons[i].Color.R * a, cubePolygons[i].Color.G * a, cubePolygons[i].Color.B * a, 1));
+                GL.Vertex3(cubePolygons[i].Vertices[0] + d);
+                GL.Vertex3(cubePolygons[i].Vertices[1] + d);
+                GL.Vertex3(cubePolygons[i].Vertices[2] + d);
                 GL.End();
-            }
-
-            Polygon3[] spherePolygons = primitives[1].GetPolygons();
-
-            for (int i = 0; i < spherePolygons.Length; ++i)
-            {
-                float b =  MathF.Acos(Vector3.Dot(spherePolygons[i].Normal, light) / (spherePolygons[i].Normal.Length * light.Length)) / 3.14f;
-
-                GL.Begin(PrimitiveType.Triangles);
-                GL.Color4(new Color4(spherePolygons[i].Color.R * b, spherePolygons[i].Color.G * b, spherePolygons[i].Color.B * b, 1));
-                GL.Vertex3(spherePolygons[i].Vertices[0]);
-                GL.Vertex3(spherePolygons[i].Vertices[1]);
-                GL.Vertex3(spherePolygons[i].Vertices[2]);
-                GL.End();
-            }
-            
+            }            
             
             Context.SwapBuffers();
 
