@@ -102,8 +102,7 @@ namespace RenderingGL
 
             GL.Enable(EnableCap.DepthTest);
 
-            base.OnLoad();
-            
+            base.OnLoad();            
         }
 
         protected override void OnUnload()
@@ -126,8 +125,11 @@ namespace RenderingGL
 
             theta += 0.001f;
 
+            Vector3 cubeToSphere = primitives[0].Pivot.Position - primitives[1].Pivot.Position;
+            primitives[0].Velocity = Vector3.Normalize(new(-cubeToSphere.Z, cubeToSphere.Y, cubeToSphere.X)) * 0.01f;
             primitives[0].Pivot.RotateHorizontal(0.005f);
             primitives[0].Pivot.RotateVertical(0.001f);
+            primitives[0].Move();
 
             base.OnUpdateFrame(args);
         }
@@ -149,8 +151,7 @@ namespace RenderingGL
             }           
 
             
-            Vector3 d = new Vector3(5 * MathF.Sin(theta), 0, 5 * MathF.Cos(theta));
-            Vector3 lightDirection = Vector3.Normalize(primitives[0].Pivot.Position - primitives[1].Pivot.Position + d);
+            Vector3 lightDirection = Vector3.Normalize(primitives[0].Pivot.Position - primitives[1].Pivot.Position);
 
             Polygon3[] cubePolygons = primitives[0].GetPolygons();
 
@@ -160,9 +161,9 @@ namespace RenderingGL
                 
                 GL.Begin(PrimitiveType.Triangles);
                 GL.Color4(new Color4(cubePolygons[i].Color.R * a, cubePolygons[i].Color.G * a, cubePolygons[i].Color.B * a, 1));
-                GL.Vertex3(cubePolygons[i].Vertices[0] + d);
-                GL.Vertex3(cubePolygons[i].Vertices[1] + d);
-                GL.Vertex3(cubePolygons[i].Vertices[2] + d);
+                GL.Vertex3(cubePolygons[i].Vertices[0]);
+                GL.Vertex3(cubePolygons[i].Vertices[1]);
+                GL.Vertex3(cubePolygons[i].Vertices[2]);
                 GL.End();
             }            
             
