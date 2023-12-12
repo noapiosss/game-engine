@@ -14,6 +14,7 @@ namespace RenderingGL
     {
         private Camera camera;
         private Primitive[] primitives;
+        private float theta = 0;
 
         public Game(Camera camera, Primitive[] primitives, int width = 1280, int height = 768)
             : base(
@@ -25,18 +26,18 @@ namespace RenderingGL
                     StartVisible = false,
                     StartFocused = true,
                     API = ContextAPI.OpenGL,
-                    Profile = ContextProfile.Core,
+                    Flags = ContextFlags.Default,
+                    Profile = ContextProfile.Compatability,
                     APIVersion = new Version(3, 3)
                 })
         {
-            CenterWindow();
-            UpdateFrequency = 1/60f;
+            CenterWindow();UpdateFrequency = 1/60f;
             this.camera = camera;
             this.primitives = primitives;
 
             KeyDown += (e) =>
             {
-                float step = 0.05f;
+                float step = 10f;
                 float angle = 0.05f;
 
                 switch(e.Key)
@@ -90,24 +91,19 @@ namespace RenderingGL
 
         protected override void OnResize(ResizeEventArgs e)
         {
-            camera.UpdateResolution(e.Width, e.Height);
-            
+            camera.UpdateResolution(e.Width, e.Height);            
             GL.Viewport(0, 0, e.Width, e.Height);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-            Matrix4 perspective = camera.GetProjectionMatrix();
-            
-            GL.LoadMatrix(ref perspective);
-            GL.MatrixMode(MatrixMode.Modelview);
-
         }
 
         protected override void OnLoad()
         {      
             IsVisible = true;
-            GL.ClearColor(Color4.Black);
+            GL.ClearColor(Color4.Black);       
+
+            GL.Enable(EnableCap.DepthTest);
 
             base.OnLoad();
+            
         }
 
         protected override void OnUnload()
@@ -117,6 +113,19 @@ namespace RenderingGL
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
+            GL.ClearColor(Color4.Black);
+
+            Matrix4 perspective = camera.GetProjectionMatrix();
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref perspective);
+
+            Matrix4 lookAt = camera.GetViewMatrix();
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref lookAt);
+
+            theta += 0.001f;
+            primitives[0].Pivot.RotateHorizontal(0.001f);
+            primitives[0].Pivot.RotateVertical(0.001f);
 
             base.OnUpdateFrame(args);
         }
@@ -124,9 +133,8 @@ namespace RenderingGL
         protected override void OnRenderFrame(FrameEventArgs args)
         {         
             GL.LoadIdentity();   
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-            
-            GL.Begin(BeginMode.Triangles);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            Vector3 light = new(0, -1, 0);
 
             foreach (Primitive primitive in primitives)
             {
@@ -134,17 +142,23 @@ namespace RenderingGL
 
                 for (int i = 0; i < polygons.Length; ++i)
                 {
-                    GL.Color4(polygons[i].Color);
-                    GL.Vertex3(polygons[i].Vertices[0]);
-                    GL.Vertex3(polygons[i].Vertices[1]);
-                    GL.Vertex3(polygons[i].Vertices[2]);
+                    float b =  MathF.Acos(Vector3.Dot(polygons[i].Normal, light) / (polygons[i].Normal.Length * light.Length)) / 3.14f;
+
+                    GL.Begin(PrimitiveType.Triangles);
+                    GL.Color4(new Color4(polygons[i].Color.R * b, polygons[i].Color.G * b, polygons[i].Color.B * b, 1));
+                    GL.Vertex3(polygons[i].Vertices[0] + new Vector3(MathF.Sin(theta), 0, MathF.Cos(theta)));
+                    GL.Vertex3(polygons[i].Vertices[1] + new Vector3(MathF.Sin(theta), 0, MathF.Cos(theta)));
+                    GL.Vertex3(polygons[i].Vertices[2] + new Vector3(MathF.Sin(theta), 0, MathF.Cos(theta)));
+                    GL.End();
                 }
             }
             
-            GL.End();
             
             Context.SwapBuffers();
+
             base.OnRenderFrame(args);
         }
+
+        
     }
 }
