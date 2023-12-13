@@ -20,7 +20,7 @@ internal class Program
 
         Primitive[] primitives = new Primitive[]
         {
-            new Cube(new Vector3(0, 0, 5), 1, new Color4(1f, 0f, 0f, 1f), new Vector3(0, 0, 0), 1),
+            new Cube(new Vector3(0, 0, 6), 1, new Color4(1f, 0f, 0f, 1f), new Vector3(0, 0, 0), 1),
             new Spere(new Vector3(0, 0, 3), 1, 20, 20, new Color4(1f, 0.6f, 0f, 1f), Vector3.Zero, 1)
         };
 

@@ -125,11 +125,22 @@ namespace RenderingGL
 
             theta += 0.001f;
 
-            Vector3 cubeToSphere = primitives[0].Pivot.Position - primitives[1].Pivot.Position;
-            primitives[0].Velocity = Vector3.Normalize(new(-cubeToSphere.Z, cubeToSphere.Y, cubeToSphere.X)) * 0.01f;
+            
             primitives[0].Pivot.RotateHorizontal(0.005f);
             primitives[0].Pivot.RotateVertical(0.001f);
+
+            // orbit movement
+            Vector3 cubeToSphere = primitives[0].Pivot.Position - primitives[1].Pivot.Position;
+            float orbit = cubeToSphere.Length;
+            primitives[0].Velocity = Vector3.Normalize(new(-cubeToSphere.Z, cubeToSphere.Y, cubeToSphere.X)) * 0.01f;
             primitives[0].Move();
+
+            // compensate movement away from center
+            cubeToSphere = primitives[0].Pivot.Position - primitives[1].Pivot.Position;
+            float extraOrbit = cubeToSphere.Length - orbit;
+            primitives[0].Velocity = -cubeToSphere.Normalized() * extraOrbit;
+            primitives[0].Move();
+            
 
             base.OnUpdateFrame(args);
         }
