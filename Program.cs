@@ -33,13 +33,14 @@ internal class Program
             // new Cube(new Vector3(-2, 0.8f, 6), 1, new Color4(0.6f, 0.2f, 0.6f, 1f), new Vector3(-0.0001f, 0, 0)),
             // new Cube(new Vector3(2, 0.9f, 6), 1, new Color4(0.4f, 0.1f, 0.8f, 1f), new Vector3(-0.0001f, 0, 0)),
             new Rectangle3D(new Vector3(-4, -4 + 3f/2, 2), 3, 3, 3, new Color4(1f, 0f, 0f, 1f), new Vector3(0, 0, 0), 1, 1, false),
-            new Rectangle3D(new Vector3(0, -4 + 3f/2, 2), 3, 3, 3, new Color4(0f, 1f, 0f, 1f), new Vector3(0, 0, 0), 1, 1, false),
             new Rectangle3D(new Vector3(4, -4 + 3f/2, 2), 3, 3, 3, new Color4(0f, 0f, 1f, 1f), new Vector3(0, 0, 0), 1, 1, false),
             
             new Rectangle3D(new Vector3(0, -14.5f, 0), 20, 20, 20, new Color4(0.6f, 0.6f, 0.6f, 1f), new Vector3(0, 0, 0), 1, 1, true),
         };
 
-        World world = new(primitives, Vector3.Zero);
+        Primitive player = new Rectangle3D(new Vector3(0, -4 + 3f/2, 2), 3, 3, 3, new Color4(0f, 1f, 0f, 1f), new Vector3(0, 0, 0), 1, 1, false);
+
+        World world = new(primitives, player, Vector3.Zero);
 
         using (Game game = new(camera, world, width, height))
         {

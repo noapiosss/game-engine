@@ -10,11 +10,16 @@ namespace RenderingGL
     public class World
     {
         private List<Primitive> primitives;
+        public Primitive Player;
         private Vector3 gravity = new Vector3(0, -0.0000032f, 0);
 
-        public World(ICollection<Primitive> primitives, Vector3 gravity)
+        public World(ICollection<Primitive> primitives, Primitive player, Vector3 gravity)
         {
             this.primitives = primitives.ToList();
+            Player = player;
+
+            this.primitives.Add(player);
+
             if (gravity != Vector3.Zero)
             {
                 this.gravity = gravity;

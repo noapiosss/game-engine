@@ -72,31 +72,31 @@ namespace RenderingGL
 
                     case Keys.Space:
                         // camera.MoveUp(step);
-                        world.GetPrimitive(0).Velocity += Vector3.UnitY * 0.003f;
+                        world.Player.Velocity += Vector3.UnitY * 0.003f;
                     break;
 
                     case Keys.Left:
-                        world.GetPrimitive(0).Pivot.Move(Vector3.UnitX * step * 5);
+                        world.Player.Pivot.Move(Vector3.UnitX * step * 5);
                     break;
 
                     case Keys.Right:
-                        world.GetPrimitive(0).Pivot.Move(-Vector3.UnitX * step * 5);
+                        world.Player.Pivot.Move(-Vector3.UnitX * step * 5);
                     break;
 
                     case Keys.Down:
-                        world.GetPrimitive(0).Pivot.Move(-Vector3.UnitZ * step * 5);
+                        world.Player.Pivot.Move(-Vector3.UnitZ * step * 5);
                     break;
 
                     case Keys.Up:
-                        world.GetPrimitive(0).Pivot.Move(Vector3.UnitZ * step * 5);
+                        world.Player.Pivot.Move(Vector3.UnitZ * step * 5);
                     break;
 
                     case Keys.E:
-                        world.GetPrimitive(0).Pivot.RotateHorizontal(-angle);
+                        world.Player.Pivot.RotateHorizontal(-angle);
                     break;
 
                     case Keys.Q:
-                        world.GetPrimitive(0).Pivot.RotateHorizontal(angle);
+                        world.Player.Pivot.RotateHorizontal(angle);
                     break;
                     // case Keys.Left:
                     //     camera.LookSide(angle);
