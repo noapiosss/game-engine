@@ -9,6 +9,7 @@ using System;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.IO;
 using RenderingGL.Engine.Primitives;
+using System.Collections.Generic;
 
 namespace RenderingGL
 {
@@ -20,9 +21,9 @@ namespace RenderingGL
         private ShaderProgram shaderProgram;
 
         private Camera camera;
-        private Primitive[] primitives;
+        private World world;
 
-        public Game(Camera camera, Primitive[] primitives, int width = 1280, int height = 768)
+        public Game(Camera camera, World world, int width = 1280, int height = 768)
             : base(
                 GameWindowSettings.Default,
                 new NativeWindowSettings()
@@ -39,7 +40,8 @@ namespace RenderingGL
             CenterWindow();
             UpdateFrequency = 1/60f;
             this.camera = camera;
-            this.primitives = primitives;
+            this.world = world;
+
 
             KeyDown += (e) =>
             {
@@ -69,24 +71,48 @@ namespace RenderingGL
                     break;
 
                     case Keys.Space:
-                        camera.MoveUp(step);
+                        // camera.MoveUp(step);
+                        world.GetPrimitive(0).Velocity += Vector3.UnitY * 0.003f;
                     break;
 
                     case Keys.Left:
-                        camera.LookSide(angle);
+                        world.GetPrimitive(0).Pivot.Move(Vector3.UnitX * step * 5);
                     break;
 
                     case Keys.Right:
-                        camera.LookSide(-angle);
+                        world.GetPrimitive(0).Pivot.Move(-Vector3.UnitX * step * 5);
                     break;
 
                     case Keys.Down:
-                        camera.LookUp(angle);
+                        world.GetPrimitive(0).Pivot.Move(-Vector3.UnitZ * step * 5);
                     break;
 
                     case Keys.Up:
-                        camera.LookUp(-angle);
+                        world.GetPrimitive(0).Pivot.Move(Vector3.UnitZ * step * 5);
                     break;
+
+                    case Keys.E:
+                        world.GetPrimitive(0).Pivot.RotateHorizontal(-angle);
+                    break;
+
+                    case Keys.Q:
+                        world.GetPrimitive(0).Pivot.RotateHorizontal(angle);
+                    break;
+                    // case Keys.Left:
+                    //     camera.LookSide(angle);
+                    // break;
+
+                    // case Keys.Right:
+                    //     camera.LookSide(-angle);
+                    // break;
+
+                    // case Keys.Down:
+                    //     camera.LookUp(angle);
+                    // break;
+
+                    // case Keys.Up:
+                    //     camera.LookUp(-angle);
+                    // break;
                 }
             };
         }
@@ -107,8 +133,10 @@ namespace RenderingGL
             IsVisible = true;
 
             GL.ClearColor(Color4.Black);
-
+            
+            
             int polygonCount = 0;
+            List<Primitive> primitives = world.GetPrimitives();
             foreach (Primitive primitive in primitives)
             {
                 polygonCount += primitive.GetPolygons().Length;
@@ -143,6 +171,7 @@ namespace RenderingGL
             indexBuffer.SetData(indices, indices.Length);
 
             vertexArray = new(vertexBuffer);
+            
 
             string vertexShaderCode = File.ReadAllText("C:\\Users\\Lenovo\\Desktop\\RenderingGL\\Shaders\\PolygonShaders\\VertexShader.glsl");
             string fragmentShaderCode = File.ReadAllText("C:\\Users\\Lenovo\\Desktop\\RenderingGL\\Shaders\\PolygonShaders\\FragmentShader.glsl");
@@ -190,23 +219,11 @@ namespace RenderingGL
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
-            foreach (Primitive primitive1 in primitives)
-            {
-                primitive1.Velocity -= Vector3.UnitY * 0.0000032f;
-                primitive1.Move();
-
-                foreach (Primitive primitive2 in primitives)
-                {
-                    if (primitive1.Equals(primitive2))
-                    {
-                        continue;
-                    }
-
-                    primitive1.SolveCollision(primitive2);
-                }
-            }
+            world.Tick();
 
             int polygonCount = 0;
+
+            List<Primitive> primitives = world.GetPrimitives();
             foreach (Primitive primitive in primitives)
             {
                 polygonCount += primitive.GetPolygons().Length;
@@ -245,6 +262,7 @@ namespace RenderingGL
 
             shaderProgram.SetUniform("ViewMatrix", camera.GetViewMatrix());            
             shaderProgram.SetUniform("ProjectMatrix", camera.GetProjectionMatrix());
+
             base.OnUpdateFrame(args);
         }
 

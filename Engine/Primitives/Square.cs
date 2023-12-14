@@ -9,22 +9,9 @@ namespace RenderingGL.Engine.Primitives
     {
         private float length;
         public Square(Pivot pivot, Color4 color)
+            : base(pivot, color, Vector3.Zero, 0, 1, true)
         {
-            Pivot = pivot;
-            Color = color;
-            Velocity = Vector3.Zero;
             length = 20;
-            IsStatic = true;
-        }
-
-        public override void OnCollision()
-        {
-            
-        }
-
-        public override void SolveCollision(Primitive primitive)
-        {
-            
         }
 
         public override Polygon3[] GetPolygons()

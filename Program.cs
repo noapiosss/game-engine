@@ -32,14 +32,16 @@ internal class Program
             // new Cube(new Vector3(0, 0.7f, 6), 1, new Color4(0.2f, 0.6f, 0.3f, 1f), new Vector3(-0.0001f, 0, -0.0001f)),
             // new Cube(new Vector3(-2, 0.8f, 6), 1, new Color4(0.6f, 0.2f, 0.6f, 1f), new Vector3(-0.0001f, 0, 0)),
             // new Cube(new Vector3(2, 0.9f, 6), 1, new Color4(0.4f, 0.1f, 0.8f, 1f), new Vector3(-0.0001f, 0, 0)),
-            new Cube(new Vector3(-4, -4 + 3f/2, 2), 3, new Color4(0.5f, 0.4f, 0.2f, 1f), new Vector3(0.0001f, 0, 0), 1),
-            new Cube(new Vector3(0, -4, 2), 1, new Color4(0.2f, 0.4f, 0.4f, 1f), new Vector3(-0.002f, 0, 0), 1),
-            new Cube(new Vector3(4, -4 + 3f/2, 2), 3, new Color4(0.4f, 0.3f, 0.5f, 1f), new Vector3(-0.0001f, 0, 0), 1),
+            new Rectangle3D(new Vector3(-4, -4 + 3f/2, 2), 3, 3, 3, new Color4(1f, 0f, 0f, 1f), new Vector3(0, 0, 0), 1, 1, false),
+            new Rectangle3D(new Vector3(0, -4 + 3f/2, 2), 3, 3, 3, new Color4(0f, 1f, 0f, 1f), new Vector3(0, 0, 0), 1, 1, false),
+            new Rectangle3D(new Vector3(4, -4 + 3f/2, 2), 3, 3, 3, new Color4(0f, 0f, 1f, 1f), new Vector3(0, 0, 0), 1, 1, false),
             
-            new Square(new(new(0,-4,0), new()), new Color4(0.6f, 0.6f, 0.6f, 1f))
+            new Rectangle3D(new Vector3(0, -14.5f, 0), 20, 20, 20, new Color4(0.6f, 0.6f, 0.6f, 1f), new Vector3(0, 0, 0), 1, 1, true),
         };
 
-        using (Game game = new(camera, primitives, width, height))
+        World world = new(primitives, Vector3.Zero);
+
+        using (Game game = new(camera, world, width, height))
         {
             game.Run();
         } 

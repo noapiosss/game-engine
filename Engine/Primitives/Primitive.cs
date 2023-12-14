@@ -20,6 +20,26 @@ namespace RenderingGL.Engine.Primitives
         public Vector3[] GlobalVertices;
         protected Polygon3[] Polygons;
 
+        protected Primitive(Pivot pivot, Color4 color, Vector3 velocity, float density, float restitution, bool isStatic)
+        {
+            Pivot = pivot;
+            Color = color;
+            Velocity = velocity;
+            Density = density;
+            IsStatic = isStatic;
+
+            if (restitution < 0)
+            {
+                Restitution = 0;
+            }
+            if (restitution > 1)
+            {
+                Restitution = 1;
+            }
+
+            Restitution = restitution;
+        }
+
         public abstract Polygon3[] GetPolygons();
         public void Move()
         {
@@ -30,9 +50,6 @@ namespace RenderingGL.Engine.Primitives
 
             Pivot.Move(Velocity);
         }
-
-        public abstract void OnCollision();
-        public abstract void SolveCollision(Primitive primitive);
 
         protected Vector3 ToGlobal(Vector3 point)
         {
